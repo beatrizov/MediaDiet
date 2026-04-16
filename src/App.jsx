@@ -22,43 +22,47 @@ export default function App() {
     signOut(auth);
   };
 
-  if (!user) return <LoginComponent onLogin={setUser} />;
 
   return (
-    <div>
-      <h1 style={{ textAlign: 'center', margin: '20px 0' }}>MediaDiet</h1>
+    <>
+      {/* 1. O Toaster fica aqui no topo, livre de condicionais, garantindo que ele exista em todas as telas */}
+      <Toaster
+        position="bottom-center"
+        toastOptions={{
+          style: {
+            background: 'var(--card-bg)',
+            color: 'var(--text-main)',
+            border: '1px solid var(--lb-green)',
+          },
+          success: {
+            iconTheme: {
+              primary: 'var(--lb-green)',
+              secondary: 'var(--card-bg)',
+            },
+          },
+        }}
+      />
 
-      <Toaster 
-  position="bottom-center"
-  toastOptions={{
-    style: {
-      background: 'var(--card-bg)',
-      color: 'var(--text-main)',
-      border: '1px solid var(--lb-green)',
-    },
-    success: {
-      iconTheme: {
-        primary: 'var(--lb-green)',
-        secondary: 'var(--card-bg)',
-      },
-    },
-  }}
-/>
+      {/* 2. Lógica de exibição: Se NÃO tiver usuário logado, mostra SÓ o Login */}
+      {!user ? (
+        <LoginComponent onLogin={setUser} />
+      ) : (
+        <div>
+          <h1 style={{ textAlign: 'center', margin: '20px 0' }}>MediaDiet</h1>
+          
+          <div className="navbar">
+            <button className="nav-button" onClick={() => setView('search')}>Buscar</button>
+            <button className="nav-button" onClick={() => setView('library')}>Biblioteca</button>
+            <button className="nav-button" onClick={() => setView('dashboard')}>Estatísticas</button>
+            <button className="nav-button" onClick={handleSignOut}>Sair</button>
+          </div>
 
-      <div className="navbar">
-        <button className="nav-button" onClick={() => setView('search')}>Buscar</button>
-        <button className="nav-button" onClick={() => setView('library')}>Biblioteca</button>
-        
-        {/* 2. Adicionamos o botão do Perfil/Estatísticas */}
-        <button className="nav-button" onClick={() => setView('dashboard')}>Estatísticas</button>
-        
-        <button className="nav-button" onClick={handleSignOut}>Sair</button>
-      </div>
-
-      {/* 3. Lógica para mostrar a tela certa */}
-      {view === 'search' && <SearchComponent />}
-      {view === 'library' && <LibraryComponent />}
-      {view === 'dashboard' && <UserDashboard />}
-    </div>
+          {/* Renderização das Views (mantenha o código que você já tem aqui) */}
+          {view === 'search' && <SearchComponent />}
+          {view === 'library' && <LibraryComponent />}
+          {view === 'dashboard' && <UserDashboard />}
+        </div>
+      )}
+    </>
   );
 }

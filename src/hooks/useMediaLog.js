@@ -19,7 +19,7 @@ export const useMediaLog = () => {
       if (!auth.currentUser) throw new Error("Usuário não autenticado");
       await addDoc(logCollectionRef, {
         userId: auth.currentUser.uid,
-        externalId: String(mediaData.id),
+        apiId: String(mediaData.id), // Alterado de externalId para apiId
         mediaType: mediaData.type,
         titleSnapshot: mediaData.title,
         imageSnapshot: mediaData.image,

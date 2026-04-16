@@ -3,6 +3,7 @@ import { useMediaLog } from '../hooks/useMediaLog';
 import ReviewModal from './ReviewModal.jsx';
 import toast from 'react-hot-toast';
 import "../App.css";
+import DetailsModal from './DetailsModal.jsx';
 
 export default function SearchComponent() {
   const [query, setQuery] = useState('');
@@ -18,6 +19,9 @@ export default function SearchComponent() {
   const { saveMedia } = useMediaLog();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [detailsItem, setDetailsItem] = useState(null);
 
   useEffect(() => {
     const fetchTrending = async () => {
@@ -112,14 +116,28 @@ export default function SearchComponent() {
   toast.success('Adicionado à biblioteca!');
 };
 
+const handleOpenDetails = (item) => {
+    setDetailsItem(item);
+    setIsDetailsOpen(true);
+  };
+
   const renderCards = (items) => (
     <div className="grid-container">
       {items.map((item) => (
         <div key={item.id} className="media-card">
           {item.image ? (
-            <img src={item.image} alt={item.title} />
+            <img 
+              src={item.image} 
+              alt={item.title} 
+              onClick={() => handleOpenDetails(item)}
+              style={{ cursor: 'pointer' }}
+            />
           ) : (
-            <div className="no-image-placeholder" style={{ height: '225px', backgroundColor: '#1b2228', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div 
+              className="no-image-placeholder" 
+              onClick={() => handleOpenDetails(item)}
+              style={{ height: '225px', backgroundColor: '#1b2228', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+            >
               Sem Capa
             </div>
           )}
@@ -181,6 +199,13 @@ export default function SearchComponent() {
         onSave={handleConfirmSave} 
         item={selectedItem} 
       />
+
+      <DetailsModal 
+        isOpen={isDetailsOpen} 
+        onClose={() => setIsDetailsOpen(false)} 
+        item={detailsItem} 
+      />
+      
     </div>
   );
 }
