@@ -127,7 +127,7 @@ export default function SearchComponent() {
           <div className="media-info">
             <h4 className="media-title" title={item.title}>{item.title}</h4>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '5px 0' }}>
-              {item.type === 'book' ? 'Livro' : 'Ecrã'}
+              {item.type === 'book' ? 'Livro' : item.type === 'tv' ? 'Série' : 'Filme'}
             </p>
             <button className="add-button" onClick={() => handleOpenModal(item)}>
               + Adicionar
