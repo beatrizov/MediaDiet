@@ -5,18 +5,39 @@ import {
   Tooltip, Legend, ResponsiveContainer 
 } from 'recharts';
 import '../App.css';
+import Loading from './Loading.jsx'; 
 
 export default function UserDashboard() {
   const [logs, setLogs] = useState([]);
   const { getUserLogs } = useMediaLog();
+  
+  // Estado que controla se a rodinha está girando
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchLogs = async () => {
-      const data = await getUserLogs();
-      setLogs(data);
+      setIsLoading(true); // Liga o loading
+      try {
+        const data = await getUserLogs();
+        setLogs(data);
+      } catch (error) {
+        console.error("Erro ao carregar estatísticas:", error);
+      } finally {
+        setIsLoading(false); // Desliga o loading
+      }
     };
     fetchLogs();
   }, []);
+
+  // SE ESTIVER CARREGANDO, MOSTRA APENAS A RODINHA
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  // SE TERMINOU DE CARREGAR E ESTÁ VAZIO, MOSTRA A MENSAGEM
+  if (logs.length === 0) {
+    return <div style={{ textAlign: 'center', marginTop: '50px', color: 'gray' }}>Adicione itens à sua biblioteca para ver suas estatísticas!</div>;
+  }
 
   // 1. DADOS DOS CARDS SUPERIORES
   const stats = logs.reduce((acc, item) => {
@@ -79,10 +100,6 @@ export default function UserDashboard() {
   };
 
   const chartData = processChartData();
-
-  if (logs.length === 0) {
-    return <div style={{ textAlign: 'center', marginTop: '50px' }}>Adicione itens à sua biblioteca para ver suas estatísticas!</div>;
-  }
 
   // Estilo customizado para os tooltips (caixinhas que aparecem ao passar o mouse)
   const customTooltipStyle = {

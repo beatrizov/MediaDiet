@@ -66,5 +66,20 @@ export const useMediaLog = () => {
     }
   };
 
-  return { saveMedia, getUserLogs, deleteMedia, updateMedia };
+const checkIfMediaExists = async (apiId) => {
+  if (!auth.currentUser) return false;
+  
+  const idStr = String(apiId);
+
+  // Criamos duas consultas: uma para o padrão novo e outra para o antigo
+  const qNew = query(logCollectionRef, where("userId", "==", auth.currentUser.uid), where("apiId", "==", idStr));
+  const qOld = query(logCollectionRef, where("userId", "==", auth.currentUser.uid), where("externalId", "==", idStr));
+  
+  const [resNew, resOld] = await Promise.all([getDocs(qNew), getDocs(qOld)]);
+  
+  return !resNew.empty || !resOld.empty;
+};
+
+  // Não esqueça de adicionar ao return do hook:
+  return { saveMedia, getUserLogs, deleteMedia, updateMedia, checkIfMediaExists };
 };

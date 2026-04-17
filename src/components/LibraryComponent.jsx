@@ -2,18 +2,29 @@ import React, { useEffect, useState } from 'react';
 import { useMediaLog } from '../hooks/useMediaLog';
 import DetailsModal from './DetailsModal.jsx';
 import "../App.css";
+import Loading from './Loading.jsx'; 
 
 export default function LibraryComponent() {
   const [logs, setLogs] = useState([]);
   const [activeTab, setActiveTab] = useState('all');
   const [selectedItem, setSelectedItem] = useState(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  
+  // NOVO: Estado que controla se a rodinha está girando
+  const [isLoading, setIsLoading] = useState(true);
 
   const { getUserLogs, updateMedia, deleteMedia } = useMediaLog();
 
   const fetchLogs = async () => {
-    const data = await getUserLogs();
-    setLogs(data);
+    setIsLoading(true); // Liga o loading antes de buscar os dados
+    try {
+      const data = await getUserLogs();
+      setLogs(data);
+    } catch (error) {
+      console.error("Erro ao buscar logs da biblioteca:", error);
+    } finally {
+      setIsLoading(false); // Desliga o loading independente de dar certo ou erro
+    }
   };
 
   const handleUpdateItem = async (id, rating, review, status) => {
@@ -66,31 +77,40 @@ export default function LibraryComponent() {
         <button style={tabStyle('book')} onClick={() => setActiveTab('book')}>Livros</button>
       </div>
 
-      {/* Grid de Mídias */}
-      <div className="grid-container">
-        {filteredLogs.map((item) => (
-          <div 
-            key={item.id} 
-            className="media-card" 
-            onClick={() => handleOpenDetails(item)}
-          >
-            {item.imageSnapshot ? (
-              <img src={item.imageSnapshot} alt={item.titleSnapshot} />
-            ) : (
-              <div className="no-image-placeholder">Sem Capa</div>
-            )}
-            
-            <div className="media-info">
-              <h4 className="media-title" title={item.titleSnapshot}>
-                {item.titleSnapshot}
-              </h4>
-              <div style={{ color: '#00e054', fontSize: '14px' }}>
-                {"★".repeat(item.rating || 0)}{"☆".repeat(5 - (item.rating || 0))}
+      {/* LÓGICA DE EXIBIÇÃO: Usando o componente Loading */}
+      {isLoading ? (
+        <Loading />
+      ) : filteredLogs.length > 0 ? (
+        <div className="grid-container">
+          {filteredLogs.map((item) => (
+            <div 
+              key={item.id} 
+              className="media-card" 
+              onClick={() => handleOpenDetails(item)}
+              style={{ cursor: 'pointer' }}
+            >
+              {item.imageSnapshot ? (
+                <img src={item.imageSnapshot} alt={item.titleSnapshot} />
+              ) : (
+                <div className="no-image-placeholder">Sem Capa</div>
+              )}
+              
+              <div className="media-info">
+                <h4 className="media-title" title={item.titleSnapshot}>
+                  {item.titleSnapshot}
+                </h4>
+                <div style={{ color: '#00e054', fontSize: '14px' }}>
+                  {"★".repeat(item.rating || 0)}{"☆".repeat(5 - (item.rating || 0))}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div style={{ textAlign: 'center', color: 'gray', marginTop: '50px' }}>
+          <p>Nenhum item encontrado nesta categoria.</p>
+        </div>
+      )}
 
       <DetailsModal 
         isOpen={isDetailsOpen} 

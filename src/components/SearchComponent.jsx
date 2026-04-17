@@ -4,6 +4,7 @@ import ReviewModal from './ReviewModal.jsx';
 import toast from 'react-hot-toast';
 import "../App.css";
 import DetailsModal from './DetailsModal.jsx';
+import Loading from './Loading.jsx'; 
 
 export default function SearchComponent() {
   const [query, setQuery] = useState('');
@@ -13,7 +14,6 @@ export default function SearchComponent() {
   const [trendingMovies, setTrendingMovies] = useState([]);
   const [trendingBooks, setTrendingBooks] = useState([]);
   
-  // NOVO: Estado que controla se a rodinha está girando
   const [isLoading, setIsLoading] = useState(true); 
   
   const { saveMedia } = useMediaLog();
@@ -25,11 +25,11 @@ export default function SearchComponent() {
 
   useEffect(() => {
     const fetchTrending = async () => {
-      setIsLoading(true); // Liga o loading ao entrar na tela
+      setIsLoading(true); 
       try {
         const tmdbRes = await fetch(`https://api.themoviedb.org/3/movie/now_playing?api_key=${import.meta.env.VITE_TMDB_KEY}&language=pt-BR&page=1`);
         const tmdbData = await tmdbRes.json();
-        const movies = (tmdbData.results || []).slice(0, 4).map(item => ({
+        const movies = (tmdbData.results || []).slice(0, 6).map(item => ({
           id: item.id,
           title: item.title,
           image: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : '',
@@ -44,7 +44,7 @@ export default function SearchComponent() {
         const recentBooks = (gbData.items || []).filter(item => {
           const pubDate = item.volumeInfo.publishedDate;
           if (!pubDate) return false; 
-          const pubYear = parseInt(pubDate.substring(0, 4), 10);
+          const pubYear = parseInt(pubDate.substring(0, 6), 10);
           return pubYear >= currentYear - 2 && pubYear <= currentYear;
         });
 
@@ -62,7 +62,7 @@ export default function SearchComponent() {
       } catch (error) {
         console.error("Erro ao carregar itens em alta:", error);
       } finally {
-        setIsLoading(false); // NOVO: Desliga o loading independentemente de dar certo ou erro
+        setIsLoading(false); 
       }
     };
 
@@ -71,7 +71,7 @@ export default function SearchComponent() {
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    setIsLoading(true); // Liga o loading ao clicar em Buscar
+    setIsLoading(true); 
     let fetchedResults = [];
 
     try {
@@ -101,7 +101,7 @@ export default function SearchComponent() {
     } catch (error) {
       console.error("Erro na busca:", error);
     } finally {
-      setIsLoading(false); // NOVO: Desliga o loading ao terminar a busca
+      setIsLoading(false); 
     }
   };
 
@@ -111,12 +111,12 @@ export default function SearchComponent() {
   };
 
   const handleConfirmSave = (item, rating, review, status) => {
-  saveMedia(item, rating, review, status);
-  setIsModalOpen(false);
-  toast.success('Adicionado à biblioteca!');
-};
+    saveMedia(item, rating, review, status);
+    setIsModalOpen(false);
+    toast.success('Adicionado à biblioteca!');
+  };
 
-const handleOpenDetails = (item) => {
+  const handleOpenDetails = (item) => {
     setDetailsItem(item);
     setIsDetailsOpen(true);
   };
@@ -176,11 +176,9 @@ const handleOpenDetails = (item) => {
         <button type="submit">Buscar</button>
       </form>
 
-      {/* LÓGICA DE EXIBIÇÃO ATUALIZADA: Mostra o spinner se estiver carregando */}
+      {/* LÓGICA DE EXIBIÇÃO ATUALIZADA: Usando o novo componente Loading */}
       {isLoading ? (
-        <div className="loader-container">
-          <div className="spinner"></div>
-        </div>
+        <Loading />
       ) : results.length > 0 ? (
         renderCards(results)
       ) : (
