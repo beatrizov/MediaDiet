@@ -19,15 +19,20 @@ export const useMediaLog = () => {
       if (!auth.currentUser) throw new Error("Usuário não autenticado");
       await addDoc(logCollectionRef, {
         userId: auth.currentUser.uid,
-        apiId: String(mediaData.id), // Alterado de externalId para apiId
+        apiId: String(mediaData.id),
         mediaType: mediaData.type,
         titleSnapshot: mediaData.title,
         imageSnapshot: mediaData.image,
+        // --- NOVOS DADOS AQUI ---
+        releaseDate: mediaData.date || "", 
+        genres: mediaData.genres || [],    
+        // ------------------------
         rating: Number(rating),
         review: review,
         status: status,
         createdAt: serverTimestamp(),
       });
+     
      // alert("Salvo com sucesso!");
     } catch (error) {
       console.error("Erro ao salvar:", error);

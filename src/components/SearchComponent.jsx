@@ -6,6 +6,12 @@ import "../App.css";
 import DetailsModal from './DetailsModal.jsx';
 import Loading from './Loading.jsx'; 
 
+// Tradutor de códigos de gênero do TMDB
+const TMDB_GENRES = {
+  28: "Ação", 12: "Aventura", 16: "Animação", 35: "Comédia", 80: "Crime", 99: "Documentário", 18: "Drama", 10751: "Família", 14: "Fantasia", 36: "História", 27: "Terror", 10402: "Música", 9648: "Mistério", 10749: "Romance", 878: "Ficção Científica", 10770: "Cinema TV", 53: "Thriller", 10752: "Guerra", 37: "Faroeste",
+  10759: "Ação e Aventura", 10762: "Kids", 10763: "News", 10764: "Reality", 10765: "Ficção e Fantasia", 10766: "Soap", 10767: "Talk", 10768: "Guerra e Política"
+};
+
 export default function SearchComponent() {
   const [query, setQuery] = useState('');
   const [searchType, setSearchType] = useState('tmdb');
@@ -33,7 +39,9 @@ export default function SearchComponent() {
           id: item.id,
           title: item.title,
           image: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : '',
-          type: 'movie'
+          type: 'movie',
+          date: item.release_date || item.first_air_date || '',
+          genres: (item.genre_ids || []).map(id => TMDB_GENRES[id]).filter(Boolean)
         }));
         setTrendingMovies(movies);
 
@@ -54,7 +62,9 @@ export default function SearchComponent() {
             id: item.id, 
             title: info.title,
             image: info.imageLinks ? info.imageLinks.thumbnail.replace('http:', 'https:') : '',
-            type: 'book'
+            type: 'book',
+            date: info.publishedDate || '',
+            genres: info.categories || []
           };
         });
         
@@ -82,7 +92,10 @@ export default function SearchComponent() {
           id: item.id,
           title: item.title || item.name,
           image: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : '',
-          type: item.media_type === 'tv' ? 'tv' : 'movie'
+          type: item.media_type === 'tv' ? 'tv' : 'movie',
+          // PEGANDO DATA E GÊNEROS (TMDB)
+          date: item.release_date || item.first_air_date || '',
+          genres: (item.genre_ids || []).map(id => TMDB_GENRES[id]).filter(Boolean)
         }));
       } else {
         const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=10&key=${import.meta.env.VITE_GOOGLE_KEY}`);
@@ -93,8 +106,12 @@ export default function SearchComponent() {
             id: item.id, 
             title: info.title,
             image: info.imageLinks ? info.imageLinks.thumbnail.replace('http:', 'https:') : '',
-            type: 'book'
+            type: 'book',
+            // PEGANDO DATA E GÊNEROS (Google Books)
+            date: info.publishedDate || '',
+            genres: info.categories || []
           };
+       
         });
       }
       setResults(fetchedResults);
